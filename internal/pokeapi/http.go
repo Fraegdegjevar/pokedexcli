@@ -7,8 +7,15 @@ import (
 	"net/url"
 )
 
+const (
+	baseURL = "https://pokeapi.co/api/v2"
+)
+
 func GetLocationAreas(fullURL *url.URL, conf *Config) (LocationAreaResponse, error) {
 	//Build request
+	if fullURL == nil {
+		fullURL, _ = url.Parse(baseURL + "/location-area/")
+	}
 	req, err := http.NewRequest("GET", fullURL.String(), nil)
 	if err != nil {
 		fmt.Println("Error generating NewRequest")
