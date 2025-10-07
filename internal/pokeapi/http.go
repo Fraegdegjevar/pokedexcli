@@ -30,6 +30,7 @@ func GetLocationAreas(fullURL *url.URL, conf *Config) (LocationAreaResponse, err
 		fmt.Println("Error fetching map info from pokeapi")
 		return LocationAreaResponse{}, err
 	}
+	defer resp.Body.Close()
 
 	//Decode response
 	var data LocationAreaResponse
