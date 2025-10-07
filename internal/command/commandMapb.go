@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/Fraegdegjevar/pokedexcli/internal/pokeapi"
 )
 
-func commandMapb(conf *Config) error {
+func commandMapb(conf *pokeapi.Config) error {
 	var fullURL *url.URL
 	if conf.Previous != nil && conf.Previous.Path != "" {
 		fullURL = conf.Previous
@@ -34,7 +36,7 @@ func commandMapb(conf *Config) error {
 	}
 
 	//Decode response
-	var data LocationAreaResponse
+	var data pokeapi.LocationAreaResponse
 	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {
 		fmt.Println("Error decoding response body")

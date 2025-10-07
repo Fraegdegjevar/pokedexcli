@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/Fraegdegjevar/pokedexcli/internal/pokeapi"
 )
 
-func commandMap(conf *Config) error {
+func commandMap(conf *pokeapi.Config) error {
 	//Default behaviour is to return batches of 20 location-areas.
 	fullURL, err := url.Parse("https://pokeapi.co/api/v2/location-area/")
 	if err != nil {
@@ -37,7 +39,7 @@ func commandMap(conf *Config) error {
 	defer resp.Body.Close()
 
 	//decode response
-	var data LocationAreaResponse
+	var data pokeapi.LocationAreaResponse
 	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {
 		fmt.Println("Error decoding response body")
