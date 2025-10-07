@@ -18,6 +18,9 @@ func commandMapb(conf *pokeapi.Config) error {
 	}
 
 	locationAreas, err := pokeapi.GetLocationAreas(fullURL, conf)
+	if err != nil {
+		return err
+	}
 
 	//Update config with the new next and previous pages from response
 	conf.Next, err = url.Parse(locationAreas.Next)
