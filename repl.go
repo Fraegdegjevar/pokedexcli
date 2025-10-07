@@ -4,9 +4,15 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
-func main() {
+func cleanInput(text string) []string {
+	stringLower := strings.ToLower(text)
+	return strings.Fields(stringLower)
+}
+
+func startRepl() {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
@@ -22,5 +28,4 @@ func main() {
 		firstWord := cleanInput(input)[0]
 		fmt.Printf("Your command was: %s\n", firstWord)
 	}
-
 }
