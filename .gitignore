@@ -2,3 +2,5 @@ bin/
 *.exe
 *.log
 repl.log
+.vscode/
+

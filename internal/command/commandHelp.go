@@ -15,5 +15,6 @@ func commandHelp(config *pokeapi.Config) error {
 	for _, cmd := range GetSupportedCommands() {
 		fmt.Printf("%s: %s\n", cmd.Name, cmd.Description)
 	}
+	fmt.Println()
 	return nil
 }

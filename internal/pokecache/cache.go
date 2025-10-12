@@ -75,7 +75,7 @@ func (c *Cache) reapLoop(interval time.Duration) {
 func NewCache(interval time.Duration) *Cache {
 	cache := &Cache{
 		//need to initialise a map - rest fine as zeroinit
-		Entries: make(map[string]cacheEntry)
+		Entries: make(map[string]cacheEntry),
 	}
 	//Calls looping method that deletes any entries older than
 	// the interval every interval tick using time.Ticker
