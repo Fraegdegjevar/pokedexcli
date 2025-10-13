@@ -17,7 +17,6 @@ func commandExplore(conf *pokeapi.Config, args []string) error {
 	}
 
 	locationArea, err := conf.GetLocationArea(args[0])
-
 	if err != nil {
 		return err
 	}

@@ -73,6 +73,11 @@ func RequestLocationArea(fullURL *url.URL) (LocationArea, error) {
 	}
 	defer resp.Body.Close()
 
+	// Test for application errors i.e http error codes
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return LocationArea{}, fmt.Errorf("unexpected HTTP status: %v", resp.StatusCode)
+	}
+
 	// Decode
 	var locationArea LocationArea
 	err = json.NewDecoder(resp.Body).Decode(&locationArea)
