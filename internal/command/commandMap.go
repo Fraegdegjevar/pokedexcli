@@ -6,7 +6,7 @@ import (
 	"github.com/Fraegdegjevar/pokedexcli/internal/pokeapi"
 )
 
-func commandMap(conf *pokeapi.Config) error {
+func commandMap(conf *pokeapi.Config, _ []string) error {
 	//Default behaviour is to return batches of 20 location-areas.
 	//Use the next URL stored in conf if it exists and update next/previous
 	// Else default to the base URL and update next

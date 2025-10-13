@@ -46,7 +46,6 @@ func TestRequestLocationAreas(t *testing.T) {
 			//Error 404 to test GetLocationAreas response error handling
 			http.NotFound(w, r)
 		}
-		//t.Errorf("unexpected path: got %s, want /location-area/", r.URL.Path)
 
 	}))
 	defer server.Close()
@@ -167,6 +166,7 @@ func TestUpdatePagination(t *testing.T) {
 	}
 }
 
-func TestGetLocationAreas(t *testing.T) {
-
+func TestRequestLocationArea(t *testing.T) {
+	//Once again, we want to test how the function requests and handles
+	// a response, not the underlying API. So we mock the JSON and http
 }

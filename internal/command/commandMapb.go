@@ -6,7 +6,7 @@ import (
 	"github.com/Fraegdegjevar/pokedexcli/internal/pokeapi"
 )
 
-func commandMapb(conf *pokeapi.Config) error {
+func commandMapb(conf *pokeapi.Config, _ []string) error {
 	//in case we are already on first page (no previous)
 	if conf.Previous == nil || conf.Previous.Path == "" {
 		fmt.Println("you're on the first page.")

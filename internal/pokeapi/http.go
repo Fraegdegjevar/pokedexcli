@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	baseURL = "https://pokeapi.co/api/v2"
+	baseURL              = "https://pokeapi.co/api/v2"
+	LocationAreaEndpoint = "/location-area/"
 )
 
 func RequestLocationAreas(fullURL *url.URL) (NamedAPIResourceList, error) {
@@ -51,6 +52,34 @@ func RequestLocationAreas(fullURL *url.URL) (NamedAPIResourceList, error) {
 	return data, nil
 }
 
-func RequestLocationAreaPokemon(fullURL *url.URL) LocationArea {
+func RequestLocationArea(fullURL *url.URL) (LocationArea, error) {
+	// Build request
+	req, err := http.NewRequest("GET", fullURL.String(), nil)
 
+	if err != nil {
+		return LocationArea{}, fmt.Errorf("error generating request: %v", err)
+	}
+
+	//Initialise HTTP client with timeout
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	//Perform request
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return LocationArea{}, fmt.Errorf("error performing request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Decode
+	var locationArea LocationArea
+	err = json.NewDecoder(resp.Body).Decode(&locationArea)
+
+	if err != nil {
+		return LocationArea{}, fmt.Errorf("error decoding response: %v", err)
+	}
+
+	return locationArea, nil
 }

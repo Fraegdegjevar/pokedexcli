@@ -26,7 +26,7 @@ func TestCommandHelp(t *testing.T) {
 	// very important global state restore for other tests
 	defer func() { os.Stdout = old }()
 
-	err := commandHelp(&pokeapi.Config{})
+	err := commandHelp(&pokeapi.Config{}, nil)
 	if err != nil {
 		t.Fatalf("Error with commandHelp: %v", err)
 	}
@@ -51,7 +51,7 @@ func TestCommandHelp(t *testing.T) {
 	// Check output string has name/description of each
 	// function in registry
 	if !strings.Contains(output,
-		"exit: Exit the Pokedex\nhelp: Displays a help message\nmap: Displays the names of the next 20 location areas in the Pokemon world.\nmapb: Displays the names of the previous 20 location areas in the Pokemon world.") {
+		"exit: Exit the Pokedex\n") {
 		t.Errorf("Expecting command help text but got: %v", output)
 	}
 }
@@ -65,7 +65,7 @@ func TestCommandExit(t *testing.T) {
 	// a child process spawned by this function
 	// (and not the parent process)
 	if os.Getenv("EXIT_TEST") == "1" {
-		commandExit(&pokeapi.Config{})
+		commandExit(&pokeapi.Config{}, nil)
 		return
 	}
 

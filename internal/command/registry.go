@@ -10,7 +10,7 @@ import (
 type cliCommand struct {
 	Name        string
 	Description string
-	Callback    func(*pokeapi.Config) error
+	Callback    func(*pokeapi.Config, []string) error
 }
 
 // Define our supportedCommands and register
@@ -21,6 +21,11 @@ func GetSupportedCommands() map[string]cliCommand {
 			Name:        "exit",
 			Description: "Exit the Pokedex",
 			Callback:    commandExit,
+		},
+		"explore": {
+			Name:        "explore",
+			Description: "Display all pokemon in the area supplied",
+			Callback:    commandExplore,
 		},
 		"help": {
 			Name:        "help",
@@ -46,13 +51,18 @@ func GetSupportedCommands() map[string]cliCommand {
 func ExecuteCommand(input []string, config *pokeapi.Config) error {
 	//Match command entered to cliCommand struct and handle
 	// noexist
-	cmd, exists := GetSupportedCommands()[input[0]]
+	cmdName := input[0]
+
+	//all words after the first 'command word' are treated as args.
+	//Individual command* functions handle the args slice individually.
+	args := input[1:]
+	cmd, exists := GetSupportedCommands()[cmdName]
 
 	if exists {
 		//call function in callback - passing config pointer
 		// note we update the values in config inside the called function
 		// via config pointer.
-		err := cmd.Callback(config)
+		err := cmd.Callback(config, args)
 		if err != nil {
 			return fmt.Errorf("error calling %s: %v", cmd.Name, err)
 		}

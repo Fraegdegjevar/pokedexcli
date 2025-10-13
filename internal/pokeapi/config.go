@@ -34,10 +34,14 @@ func (c *Config) UpdatePagination(resp *NamedAPIResourceList) error {
 
 func (c *Config) GetLocationAreas(u *url.URL) (NamedAPIResourceList, error) {
 	var resp NamedAPIResourceList
-
+	var err error
 	// Guard null url value
 	if u == nil {
-		u, _ = url.Parse(baseURL + "/location-area/?offset=0&limit=20")
+		u, err = url.Parse(baseURL + "/location-area/?offset=0&limit=20")
+	}
+
+	if err != nil {
+		return NamedAPIResourceList{}, fmt.Errorf("error parsing URL for GetLocationAreas: %v", err)
 	}
 
 	//Test if result in cache and parse if necessary
@@ -56,7 +60,7 @@ func (c *Config) GetLocationAreas(u *url.URL) (NamedAPIResourceList, error) {
 	}
 	fmt.Printf("Cache miss on url: %v\n", u)
 
-	resp, err := RequestLocationAreas(u)
+	resp, err = RequestLocationAreas(u)
 	if err != nil {
 		return NamedAPIResourceList{}, err
 	}
@@ -69,5 +73,26 @@ func (c *Config) GetLocationAreas(u *url.URL) (NamedAPIResourceList, error) {
 	c.Cache.Add(u.String(), page)
 	c.UpdatePagination(&resp)
 
-	return resp, err
+	return resp, nil
+}
+
+// Gets a specific location area resource. To add: cache checks and caching.
+func (c *Config) GetLocationArea(LocationAreaName string) (LocationArea, error) {
+	// Handle empty strings
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return LocationArea{}, fmt.Errorf("error parsing url in GetLocationArea: %v", err)
+
+	}
+	// Append to url path as needed to hit correct resource
+	u = u.JoinPath(LocationAreaEndpoint, LocationAreaName)
+
+	resp, err := RequestLocationArea(u)
+
+	if err != nil {
+		return LocationArea{}, err
+	}
+
+	//NOTE: No check against cache or adding result to cache yet.
+	return resp, nil
 }

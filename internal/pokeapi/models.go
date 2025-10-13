@@ -23,7 +23,7 @@ type NamedAPIResourceList struct {
 // Pokemon encounters are returned with a LocationAreaResponse. One of the fields is an array of
 // pokemon structured as a NamedAPIResource (name, url)
 type PokemonEncounter struct {
-	Pokemon []NamedAPIResource
+	Pokemon NamedAPIResource
 }
 
 // Calling the location-area endpoint with a name or ID returns data on a specific location-area
