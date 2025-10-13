@@ -11,9 +11,7 @@ func commandMap(conf *pokeapi.Config) error {
 	//Use the next URL stored in conf if it exists and update next/previous
 	// Else default to the base URL and update next
 
-	fullURL := conf.Next
-
-	locationAreas, err := conf.GetLocationAreas(fullURL)
+	locationAreas, err := conf.GetLocationAreas(conf.Next)
 	if err != nil {
 		return err
 	}

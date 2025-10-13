@@ -37,7 +37,7 @@ func (c *Config) GetLocationAreas(u *url.URL) (LocationAreaResponse, error) {
 
 	// Guard null url value
 	if u == nil {
-		u, _ = url.Parse(baseURL + "/location-area/")
+		u, _ = url.Parse(baseURL + "/location-area/?offset=0&limit=20")
 	}
 
 	//Test if result in cache and parse if necessary
@@ -58,7 +58,7 @@ func (c *Config) GetLocationAreas(u *url.URL) (LocationAreaResponse, error) {
 
 	resp, err := RequestLocationAreas(u)
 	if err != nil {
-		return LocationAreaResponse{}, nil
+		return LocationAreaResponse{}, err
 	}
 
 	page, err = json.Marshal(&resp)

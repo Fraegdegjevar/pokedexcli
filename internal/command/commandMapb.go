@@ -7,15 +7,13 @@ import (
 )
 
 func commandMapb(conf *pokeapi.Config) error {
-	fullURL := conf.Previous
-
 	//in case we are already on first page (no previous)
-	if fullURL == nil || fullURL.Path == "" {
+	if conf.Previous == nil || conf.Previous.Path == "" {
 		fmt.Println("you're on the first page.")
 		return nil
 	}
 
-	locationAreas, err := conf.GetLocationAreas(fullURL)
+	locationAreas, err := conf.GetLocationAreas(conf.Previous)
 	if err != nil {
 		return err
 	}

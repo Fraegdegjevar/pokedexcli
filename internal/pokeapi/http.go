@@ -14,9 +14,6 @@ const (
 
 func RequestLocationAreas(fullURL *url.URL) (LocationAreaResponse, error) {
 	//Build request
-	if fullURL == nil {
-		fullURL, _ = url.Parse(baseURL + "/location-area/")
-	}
 	req, err := http.NewRequest("GET", fullURL.String(), nil)
 	if err != nil {
 		fmt.Println("Error generating NewRequest")
@@ -36,12 +33,12 @@ func RequestLocationAreas(fullURL *url.URL) (LocationAreaResponse, error) {
 		fmt.Printf("Error fetching map info from pokeapi: %v\n", err)
 		return LocationAreaResponse{}, err
 	}
+	defer resp.Body.Close()
+
 	// Test for application errors i.e http error codes
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return LocationAreaResponse{}, fmt.Errorf("unexpected HTTP status: %v", resp.StatusCode)
 	}
-
-	defer resp.Body.Close()
 
 	//Decode response
 	var data LocationAreaResponse

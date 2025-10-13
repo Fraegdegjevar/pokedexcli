@@ -116,7 +116,55 @@ func TestRequestLocationAreas(t *testing.T) {
 }
 
 func TestUpdatePagination(t *testing.T) {
+	cases := []struct {
+		name             string
+		config           *Config
+		expectedErr      bool
+		expectedNext     string
+		expectedPrevious string
+	}{
+		{
+			name:             "first page",
+			config:           &Config{},
+			expectedErr:      false,
+			expectedNext:     baseURL + "/location-area/?offset=20&limit=20",
+			expectedPrevious: "",
+		},
+		{
+			name:             "second page",
+			config:           &Config{},
+			expectedErr:      false,
+			expectedNext:     baseURL + "/location-area/?offset=40&limit=20",
+			expectedPrevious: "/location-area/?offset=0&limit=20",
+		},
+		{
+			name:             "missing url",
+			config:           &Config{},
+			expectedErr:      false,
+			expectedNext:     baseURL + "/location-area/?offset=20&limit=20",
+			expectedPrevious: "",
+		},
+	}
 
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
+			resp := &LocationAreaResponse{Next: tt.expectedNext, Previous: tt.expectedPrevious}
+			err := tt.config.UpdatePagination(resp)
+
+			if (err != nil) != tt.expectedErr {
+				t.Logf("Expected err: %v but got: %v", tt.expectedErr, err)
+			}
+
+			if tt.config.Next.String() != tt.expectedNext {
+				t.Errorf("Expected config Next: %v, actual: %v", tt.expectedNext, tt.config.Next.String())
+			}
+
+			if tt.config.Previous.String() != tt.expectedPrevious {
+				t.Errorf("Expected config Previous: %v, actual: %v", tt.expectedPrevious, tt.config.Previous.String())
+			}
+		})
+	}
 }
 
 func TestGetLocationAreas(t *testing.T) {
