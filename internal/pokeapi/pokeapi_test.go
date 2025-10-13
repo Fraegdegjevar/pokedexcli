@@ -149,7 +149,7 @@ func TestUpdatePagination(t *testing.T) {
 	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
 			tt := tt
-			resp := &LocationAreaResponse{Next: tt.expectedNext, Previous: tt.expectedPrevious}
+			resp := &NamedAPIResourceList{Next: tt.expectedNext, Previous: tt.expectedPrevious}
 			err := tt.config.UpdatePagination(resp)
 
 			if (err != nil) != tt.expectedErr {

@@ -12,12 +12,12 @@ const (
 	baseURL = "https://pokeapi.co/api/v2"
 )
 
-func RequestLocationAreas(fullURL *url.URL) (LocationAreaResponse, error) {
+func RequestLocationAreas(fullURL *url.URL) (NamedAPIResourceList, error) {
 	//Build request
 	req, err := http.NewRequest("GET", fullURL.String(), nil)
 	if err != nil {
 		fmt.Println("Error generating NewRequest")
-		return LocationAreaResponse{}, err
+		return NamedAPIResourceList{}, err
 	}
 
 	//initialise HTTP client
@@ -31,22 +31,26 @@ func RequestLocationAreas(fullURL *url.URL) (LocationAreaResponse, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Printf("Error fetching map info from pokeapi: %v\n", err)
-		return LocationAreaResponse{}, err
+		return NamedAPIResourceList{}, err
 	}
 	defer resp.Body.Close()
 
 	// Test for application errors i.e http error codes
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return LocationAreaResponse{}, fmt.Errorf("unexpected HTTP status: %v", resp.StatusCode)
+		return NamedAPIResourceList{}, fmt.Errorf("unexpected HTTP status: %v", resp.StatusCode)
 	}
 
 	//Decode response
-	var data LocationAreaResponse
+	var data NamedAPIResourceList
 	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {
 		fmt.Println("Error decoding response body")
-		return LocationAreaResponse{}, err
+		return NamedAPIResourceList{}, err
 	}
 
 	return data, nil
+}
+
+func RequestLocationAreaPokemon(fullURL *url.URL) LocationArea {
+
 }

@@ -12,11 +12,11 @@ import (
 type Config struct {
 	Next                 *url.URL
 	Previous             *url.URL
-	GetLocationAreasFunc func(*url.URL) (LocationAreaResponse, error)
+	GetLocationAreasFunc func(*url.URL) (NamedAPIResourceList, error)
 	Cache                *pokecache.Cache
 }
 
-func (c *Config) UpdatePagination(resp *LocationAreaResponse) error {
+func (c *Config) UpdatePagination(resp *NamedAPIResourceList) error {
 	var err error
 	c.Next, err = url.Parse(resp.Next)
 	if err != nil {
@@ -32,8 +32,8 @@ func (c *Config) UpdatePagination(resp *LocationAreaResponse) error {
 	return nil
 }
 
-func (c *Config) GetLocationAreas(u *url.URL) (LocationAreaResponse, error) {
-	var resp LocationAreaResponse
+func (c *Config) GetLocationAreas(u *url.URL) (NamedAPIResourceList, error) {
+	var resp NamedAPIResourceList
 
 	// Guard null url value
 	if u == nil {
@@ -46,11 +46,11 @@ func (c *Config) GetLocationAreas(u *url.URL) (LocationAreaResponse, error) {
 		fmt.Printf("Cache hit on url: %v\n", u)
 		err := json.Unmarshal(page, &resp)
 		if err != nil {
-			return LocationAreaResponse{}, err
+			return NamedAPIResourceList{}, err
 		}
 		err = c.UpdatePagination(&resp)
 		if err != nil {
-			return LocationAreaResponse{}, err
+			return NamedAPIResourceList{}, err
 		}
 		return resp, nil
 	}
@@ -58,12 +58,12 @@ func (c *Config) GetLocationAreas(u *url.URL) (LocationAreaResponse, error) {
 
 	resp, err := RequestLocationAreas(u)
 	if err != nil {
-		return LocationAreaResponse{}, err
+		return NamedAPIResourceList{}, err
 	}
 
 	page, err = json.Marshal(&resp)
 	if err != nil {
-		return LocationAreaResponse{}, err
+		return NamedAPIResourceList{}, err
 	}
 
 	c.Cache.Add(u.String(), page)
