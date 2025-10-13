@@ -30,7 +30,8 @@ func GetSupportedCommands() map[string]cliCommand {
 		"map": {
 			Name:        "map",
 			Description: "Displays the names of the next 20 location areas in the Pokemon world.",
-			Callback:    commandMap,
+			// Closure to allow us to return a function of more than just *pokeapi.Config
+			Callback: commandMap,
 		},
 		"mapb": {
 			Name:        "mapb",

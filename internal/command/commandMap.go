@@ -2,7 +2,6 @@ package command
 
 import (
 	"fmt"
-	"net/url"
 
 	"github.com/Fraegdegjevar/pokedexcli/internal/pokeapi"
 )
@@ -11,25 +10,11 @@ func commandMap(conf *pokeapi.Config) error {
 	//Default behaviour is to return batches of 20 location-areas.
 	//Use the next URL stored in conf if it exists and update next/previous
 	// Else default to the base URL and update next
-	var fullURL *url.URL = nil
-	if conf.Next != nil {
-		fullURL = conf.Next
-	}
 
-	locationAreas, err := pokeapi.GetLocationAreas(fullURL, conf)
-	if err != nil {
-		return err
-	}
+	fullURL := conf.Next
 
-	//Store the next and previous urls in the API response in conf
-	conf.Next, err = url.Parse(locationAreas.Next)
+	locationAreas, err := conf.GetLocationAreas(fullURL)
 	if err != nil {
-		fmt.Println("Error parsing response next URL field as a url.URL")
-		return err
-	}
-	conf.Previous, err = url.Parse(locationAreas.Previous)
-	if err != nil {
-		fmt.Println("Error parsing response previous URL field as a url.URL")
 		return err
 	}
 

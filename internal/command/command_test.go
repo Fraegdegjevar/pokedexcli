@@ -90,5 +90,7 @@ func TestCommandExit(t *testing.T) {
 }
 
 func TestCommandMap(t *testing.T) {
-	
+	//We need to temporarily replace the GetLocationAreas function to return the mock
+	// LocationAreaResponse object - ultimately we only want to test commandMap's behaviour
+
 }

@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Fraegdegjevar/pokedexcli/internal/command"
 	"github.com/Fraegdegjevar/pokedexcli/internal/pokeapi"
+	"github.com/Fraegdegjevar/pokedexcli/internal/pokecache"
 )
 
 func startRepl() {
 	scanner := bufio.NewScanner(os.Stdin)
-	config := &pokeapi.Config{}
+	config := &pokeapi.Config{Cache: pokecache.NewCache(5 * time.Second)}
 
 	for {
 		//Notice lack of newline
