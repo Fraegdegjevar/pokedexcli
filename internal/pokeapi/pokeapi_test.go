@@ -487,8 +487,3 @@ func TestRequestPokemon(t *testing.T) {
 	}
 
 }
-
-// Note: TestGetPokemon does not add to
-func TestGetPokemon(t *testing.T) {
-
-}
