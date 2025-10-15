@@ -8,11 +8,6 @@ import (
 	"time"
 )
 
-const (
-	baseURL              = "https://pokeapi.co/api/v2"
-	LocationAreaEndpoint = "/location-area/"
-)
-
 // Variable containing RequestLocationAreas which is used by the function
 // config.GetLocationAreas. The reason we store the function below in this variable
 // is to allow us to reassign the function for testing.
@@ -97,4 +92,35 @@ func RequestLocationArea(fullURL *url.URL) (LocationArea, error) {
 	}
 
 	return locationArea, nil
+}
+
+// Get info on specific pokemon - NamedEndpoint with the ID
+func RequestPokemon(fullURL *url.URL) (Pokemon, error) {
+	req, err := http.NewRequest("GET", fullURL.String(), nil)
+
+	if err != nil {
+		return Pokemon{}, fmt.Errorf("error generating http request: %v", err)
+	}
+
+	client := &http.Client{
+		Timeout: 2 * time.Second,
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return Pokemon{}, fmt.Errorf("error performing request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return Pokemon{}, fmt.Errorf("unexpected HTTP status code: %v", err)
+	}
+
+	var pokemon Pokemon
+	err = json.NewDecoder(resp.Body).Decode(&pokemon)
+	if err != nil {
+		return Pokemon{}, fmt.Errorf("error decoding response: %v", err)
+	}
+
+	return pokemon, nil
 }

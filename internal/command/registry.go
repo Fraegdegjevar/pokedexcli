@@ -17,6 +17,11 @@ type cliCommand struct {
 // cliCommands
 func GetSupportedCommands() map[string]cliCommand {
 	supportedCommands := map[string]cliCommand{
+		"catch": {
+			Name:        "catch",
+			Description: "attempt to catch a pokemon",
+			Callback:    commandCatch,
+		},
 		"exit": {
 			Name:        "exit",
 			Description: "Exit the Pokedex",
@@ -32,6 +37,11 @@ func GetSupportedCommands() map[string]cliCommand {
 			Description: "Displays a help message",
 			Callback:    commandHelp,
 		},
+		"inspect": {
+			Name:        "inspect",
+			Description: "Inspect a caught pokemon's pokedex entry",
+			Callback:    commandInspect,
+		},
 		"map": {
 			Name:        "map",
 			Description: "Displays the names of the next 20 location areas in the Pokemon world.",
@@ -43,12 +53,17 @@ func GetSupportedCommands() map[string]cliCommand {
 			Description: "Displays the names of the previous 20 location areas in the Pokemon world.",
 			Callback:    commandMapb,
 		},
+		"pokedex": {
+			Name:        "pokedex",
+			Description: "Displays the names of all pokemon in your pokedex.",
+			Callback:    commandPokedex,
+		},
 	}
 	return supportedCommands
 }
 
 // Match input (first word) to supported commands and callback.
-func ExecuteCommand(input []string, config *pokeapi.Config) error {
+func ExecuteCommand(supportedCommands map[string]cliCommand, input []string, config *pokeapi.Config) error {
 	//Match command entered to cliCommand struct and handle
 	// noexist
 	cmdName := input[0]

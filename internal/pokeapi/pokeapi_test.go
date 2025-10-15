@@ -409,3 +409,86 @@ func TestRequestLocationArea(t *testing.T) {
 	}
 
 }
+
+// Mock up http server and test how we handle responses
+func TestRequestPokemon(t *testing.T) {
+	mockJSON := `{
+		"id": 1,
+		"name": "pikachu",
+		"base_experience": 50
+	}`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Logf("***Received request: %s %s***\n", r.Method, r.URL.String())
+		// Simulate a few different request paths
+		switch r.URL.Path {
+		case "/pikachu":
+			// Set headers for realism..
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprintln(w, mockJSON)
+		case "/bad-json":
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprintln(w, `{"id": {}, "name":{}}`)
+		default:
+			// Return error 404
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	cases := []struct {
+		name                       string
+		inputName                  string
+		expectedError              bool
+		expectedPokemonName        string
+		expectPokemonNameInPokedex bool
+	}{
+		{
+			name:                "normal response",
+			inputName:           "pikachu",
+			expectedError:       false,
+			expectedPokemonName: "pikachu",
+		},
+		{
+			name:                "bad json",
+			inputName:           "bad-json",
+			expectedError:       true,
+			expectedPokemonName: "",
+		},
+		{
+			name:                "not found",
+			inputName:           "doesn't-matter",
+			expectedError:       true,
+			expectedPokemonName: "",
+		},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
+			u, err := url.Parse(server.URL)
+			if err != nil {
+				t.Fatalf("error parsing server URL for test %v: %v", tt.name, err)
+			}
+			// construct correct url/path to go to test server
+			u = u.JoinPath(tt.inputName)
+			t.Logf("***")
+			// hit test server with RequestPokemon
+			pokemon, err := RequestPokemon(u)
+
+			if (err != nil) != tt.expectedError {
+				t.Errorf("expected error: %v but error value was: %v", tt.expectedError, err)
+			}
+
+			if pokemon.Name != tt.expectedPokemonName {
+				t.Errorf("expected pokemon name: %v got: %v", tt.expectedPokemonName, pokemon.Name)
+			}
+		})
+	}
+
+}
+
+// Note: TestGetPokemon does not add to
+func TestGetPokemon(t *testing.T) {
+
+}

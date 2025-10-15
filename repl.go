@@ -14,7 +14,9 @@ import (
 
 func startRepl() {
 	scanner := bufio.NewScanner(os.Stdin)
-	config := &pokeapi.Config{Cache: pokecache.NewCache(5 * time.Second)}
+	config := &pokeapi.Config{Cache: pokecache.NewCache(5 * time.Second),
+		Pokedex: make(map[string]pokeapi.Pokemon)}
+	supportedCommands := command.GetSupportedCommands()
 
 	for {
 		//Notice lack of newline
@@ -32,7 +34,7 @@ func startRepl() {
 		cleanedInput := cleanInput(input)
 
 		// Try to match command and call it
-		err := command.ExecuteCommand(cleanedInput, config)
+		err := command.ExecuteCommand(supportedCommands, cleanedInput, config)
 		if err != nil {
 			fmt.Println(err)
 		}
