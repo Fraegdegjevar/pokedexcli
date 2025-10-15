@@ -33,7 +33,7 @@ func (c *Config) UpdatePagination(resp *NamedAPIResourceList) error {
 }
 
 func (c *Config) GetLocationAreas(u *url.URL) (NamedAPIResourceList, error) {
-	var resp NamedAPIResourceList
+	var page NamedAPIResourceList
 	var err error
 	// Guard null url value
 	if u == nil {
@@ -45,39 +45,41 @@ func (c *Config) GetLocationAreas(u *url.URL) (NamedAPIResourceList, error) {
 	}
 
 	//Test if result in cache and parse if necessary
-	page, found := c.Cache.Get(u.String())
-	if found {
+	resp, exists := c.Cache.Get(u.String())
+	if exists {
 		fmt.Printf("Cache hit on url: %v\n", u)
-		err := json.Unmarshal(page, &resp)
+		err := json.Unmarshal(resp, &page)
 		if err != nil {
 			return NamedAPIResourceList{}, err
 		}
-		err = c.UpdatePagination(&resp)
+		err = c.UpdatePagination(&page)
 		if err != nil {
 			return NamedAPIResourceList{}, err
 		}
-		return resp, nil
+		return page, nil
 	}
 	fmt.Printf("Cache miss on url: %v\n", u)
 
-	resp, err = RequestLocationAreas(u)
+	page, err = requestLocationAreas(u)
 	if err != nil {
 		return NamedAPIResourceList{}, err
 	}
 
-	page, err = json.Marshal(&resp)
+	resp, err = json.Marshal(&page)
 	if err != nil {
 		return NamedAPIResourceList{}, err
 	}
 
-	c.Cache.Add(u.String(), page)
-	c.UpdatePagination(&resp)
+	c.Cache.Add(u.String(), resp)
+	c.UpdatePagination(&page)
 
-	return resp, nil
+	return page, nil
 }
 
 // Gets a specific location area resource. To add: cache checks and caching.
 func (c *Config) GetLocationArea(LocationAreaName string) (LocationArea, error) {
+	var locationArea LocationArea
+
 	// Handle empty strings
 	u, err := url.Parse(baseURL)
 	if err != nil {
@@ -86,13 +88,31 @@ func (c *Config) GetLocationArea(LocationAreaName string) (LocationArea, error) 
 	}
 	// Append to url path as needed to hit correct resource
 	u = u.JoinPath(LocationAreaEndpoint, LocationAreaName)
-
-	resp, err := RequestLocationArea(u)
-
-	if err != nil {
-		return LocationArea{}, err
+	// Check for presence of URL as key in cache
+	resp, exists := c.Cache.Get(u.String())
+	if exists {
+		fmt.Printf("Cache hit on url: %v\n", u)
+		err = json.Unmarshal(resp, &locationArea)
+		if err != nil {
+			return LocationArea{}, nil
+		}
+		// No pagination update required.
+		return locationArea, nil
 	}
 
-	//NOTE: No check against cache or adding result to cache yet.
-	return resp, nil
+	// If not in cache, call API
+	fmt.Printf("Cache miss on url: %v\n", u)
+	locationArea, err = requestLocationArea(u)
+	if err != nil {
+		return LocationArea{}, nil
+	}
+
+	//Add to cache - marshal
+	resp, err = json.Marshal(locationArea)
+	if err != nil {
+		return LocationArea{}, nil
+	}
+	c.Cache.Add(u.String(), resp)
+
+	return locationArea, nil
 }

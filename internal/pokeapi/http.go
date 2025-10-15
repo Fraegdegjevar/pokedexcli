@@ -13,6 +13,11 @@ const (
 	LocationAreaEndpoint = "/location-area/"
 )
 
+// Variable containing RequestLocationAreas which is used by the function
+// config.GetLocationAreas. The reason we store the function below in this variable
+// is to allow us to reassign the function for testing.
+var requestLocationAreas = RequestLocationAreas
+
 func RequestLocationAreas(fullURL *url.URL) (NamedAPIResourceList, error) {
 	//Build request
 	req, err := http.NewRequest("GET", fullURL.String(), nil)
@@ -24,7 +29,7 @@ func RequestLocationAreas(fullURL *url.URL) (NamedAPIResourceList, error) {
 	//initialise HTTP client
 	client := &http.Client{
 		// Set a timeout for receiving a response that accounts for network latency on API side.
-		Timeout: 10 * time.Second,
+		Timeout: 2 * time.Second,
 	}
 	//Do request - note that err only returns non nil
 	// if there was an error wit hthe http exchange. So if we receive a response
@@ -52,6 +57,11 @@ func RequestLocationAreas(fullURL *url.URL) (NamedAPIResourceList, error) {
 	return data, nil
 }
 
+// Variable containing RequestLocationArea which is used by the function
+// config.GetLocationArea. The reason we store the function below in this variable
+// is to allow us to reassign the function for testing.
+var requestLocationArea = RequestLocationArea
+
 func RequestLocationArea(fullURL *url.URL) (LocationArea, error) {
 	// Build request
 	req, err := http.NewRequest("GET", fullURL.String(), nil)
@@ -62,7 +72,7 @@ func RequestLocationArea(fullURL *url.URL) (LocationArea, error) {
 
 	//Initialise HTTP client with timeout
 	client := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: 2 * time.Second,
 	}
 
 	//Perform request

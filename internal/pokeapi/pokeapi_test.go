@@ -1,11 +1,15 @@
 package pokeapi
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
+	"time"
+
+	"github.com/Fraegdegjevar/pokedexcli/internal/pokecache"
 )
 
 func TestUpdatePagination(t *testing.T) {
@@ -171,11 +175,132 @@ func TestRequestLocationAreas(t *testing.T) {
 // So we need to test it finds cache values added manually. And we
 // need to test if takes in a locationarea from a call to an injected
 // RequestLocationArea function AND updates cache to contain the response.
-//func TestGetLocationArea(t *testing.T) {
-//conf := &Config{Cache: pokecache.NewCache(1 * time.Hour)}
 
-//Create local overrise of RequestLocationArea
-//}
+func TestGetLocationArea(t *testing.T) {
+
+	//Create local overrise of RequestLocationArea
+	original := requestLocationArea
+	//ensure we swap back to the original before further tests run.
+	defer func() { requestLocationArea = original }()
+
+	requestLocationArea = func(_ *url.URL) (LocationArea, error) {
+		return LocationArea{ID: 1,
+			Name: "Test-Area-1",
+			Pokemon_Encounters: []PokemonEncounter{
+				{
+					NamedAPIResource{
+						Name: "Pokemon1",
+						Url:  "pokeapi.localtest/pokemon1",
+					},
+				},
+				{
+					NamedAPIResource{
+						Name: "Pokemon2",
+						Url:  "pokeapi.localtest/pokemon2",
+					},
+				},
+			},
+		}, nil
+	}
+	// Add data for test-area-2 to cache
+	cacheResp, err := json.Marshal(LocationArea{
+		ID:   2,
+		Name: "Test-Area-2",
+		Pokemon_Encounters: []PokemonEncounter{
+			{
+				NamedAPIResource{
+					Name: "Pokemon3",
+					Url:  "pokeapi.localtest/pokemon3",
+				},
+			},
+			{
+				NamedAPIResource{
+					Name: "Pokemon4",
+					Url:  "pokeapi.localtest/pokemon4",
+				},
+			},
+		},
+	})
+
+	if err != nil {
+		t.Fatalf("test could not begin: failed to marshal test LocationArea for insertion to cache: %v", err)
+	}
+
+	cases := []struct {
+		name                 string
+		inputName            string
+		expectedAreaName     string
+		expectedAddedToCache bool
+	}{
+		{
+			name:                 "not in cache",
+			inputName:            "test-area-1",
+			expectedAreaName:     "Test-Area-1",
+			expectedAddedToCache: true,
+		},
+		{
+			name:                 "present in cache",
+			inputName:            "test-area-2",
+			expectedAreaName:     "Test-Area-2",
+			expectedAddedToCache: false,
+		},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
+			// Create local config
+			conf := &Config{Cache: pokecache.NewCache(1 * time.Hour)}
+
+			u, err := url.Parse(baseURL)
+			if err != nil {
+				t.Fatalf("%s test failed to run, could not parse inputUrl: %v", tt.name, err)
+			}
+
+			// Get url for checking cache - this is what GetLocationAreas will use to write to cache
+			u = u.JoinPath(LocationAreaEndpoint, tt.inputName)
+			// If we don't expect GetLocationArea to add to cache, we need to cache first
+			if !tt.expectedAddedToCache {
+				conf.Cache.Add(u.String(), cacheResp)
+			}
+
+			actualLocationArea, err := conf.GetLocationArea(tt.inputName)
+			if err != nil {
+				t.Fatalf("%s test failed to run, GetLocationArea returned error: %v", tt.name, err)
+			}
+
+			// Check we got the right area name - regardless of source
+			if actualLocationArea.Name != tt.expectedAreaName {
+				t.Errorf("expected location-area name: %v, got: %v ", tt.expectedAreaName, actualLocationArea.Name)
+			}
+
+			// Print cache keys
+			t.Log("Cache keys:")
+			for k := range conf.Cache.Entries {
+				t.Log(k)
+			}
+			//Check it was added to cache if necessary
+			if tt.expectedAddedToCache {
+				//
+				cached, exists := conf.Cache.Get(u.String())
+				if !exists {
+					t.Errorf("expected the location-area to be added to cache but it was not\n missing key: %v", u.String())
+				}
+
+				// Check the cached response is correct (may be redundant but an easy check)
+				var cachedLocationArea LocationArea
+				err := json.Unmarshal(cached, &cachedLocationArea)
+				if err != nil {
+					t.Fatalf("failed to unmarshal cached data that was stored by %s: %v", tt.name, err)
+				}
+
+				if cachedLocationArea.Name != tt.expectedAreaName {
+					t.Errorf("expected unmarshaled cached area name to be: %v, got: %v", tt.expectedAreaName, cachedLocationArea.Name)
+				}
+			}
+		})
+	}
+}
 
 func TestRequestLocationArea(t *testing.T) {
 	//Once again, we want to test how the function requests and handles
